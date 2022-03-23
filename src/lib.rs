@@ -41,15 +41,22 @@ impl<'a> TextPackWriter for TextBundle<'a> {
         zip.start_file("info.json", options)?;
         zip.write_all(info.to_string().as_bytes())?;
 
+        zip.start_file(self.text_filename, options)?;
+        zip.write_all(self.text.as_bytes())?;
+
         if self.assets.is_empty() == false {
             zip.add_directory("assets/", Default::default())?;
         }
 
-        // zip.start_file("test/☃.txt", options)?;
-        // zip.write_all(b"Hello, World!\n")?;
-
-        // zip.start_file("test/lorem_ipsum.txt", Default::default())?;
-        // zip.write_all(LOREM_IPSUM)?;
+        for asset in self.assets.iter() {
+            println!("{:?}", asset);
+            if let Some(name) = asset.file_name() {
+                let asset_filename = Path::new("assets/").join(name);
+                let asset_bytes = std::fs::read(asset)?;
+                zip.start_file(asset_filename.to_string_lossy(), options)?;
+                zip.write_all(&asset_bytes)?;
+            }
+        }
 
         zip.finish()?;
         Ok(())

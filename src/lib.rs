@@ -76,6 +76,7 @@ impl<'a> TextBundleWriter for TextBundle<'a> {
         fs::create_dir_all(path)?;
 
         fs::write(path.join("info.json"), info().to_string())?;
+        fs::write(path.join(self.text_filename), self.text)?;
 
         if !self.assets.is_empty() {
             let asset_dir = &path.join("assets");

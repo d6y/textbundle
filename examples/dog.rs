@@ -1,5 +1,5 @@
 use std::path::Path;
-use textbundle::{self, TextBundle, TextPackWriter};
+use textbundle::{self, TextBundle, TextBundleWriter, TextPackWriter};
 
 fn main() {
     let dog = Path::new("examples/dog.jpg");
@@ -10,6 +10,7 @@ fn main() {
     ![](assets/dog.jpg)
     "#;
 
-    let tb = TextBundle::new("text.markdown", markdown, vec![&dog]);
-    tb.write("dog.textpack").unwrap();
+    let tb = TextBundle::new(markdown, vec![&dog]);
+    tb.write_textpack("dog.textpack").unwrap();
+    tb.write_textbundle("dog.textbundle").unwrap();
 }

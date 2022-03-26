@@ -10,6 +10,6 @@ fn main() {
     ![](assets/dog.jpg)
     "#;
 
-    let tb = TextBundle::new("text.md", markdown, vec![&dog]);
+    let tb = TextBundle::new("text.markdown", markdown, vec![&dog]);
     tb.write("dog.textpack").unwrap();
 }

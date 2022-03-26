@@ -37,6 +37,8 @@ impl<'a> TextPackWriter for TextBundle<'a> {
 
         let info = json!({
             "version": 2_u8,
+            "transient": true,
+            "type" : "net.daringfireball.markdown",
         });
         zip.start_file("info.json", options)?;
         zip.write_all(info.to_string().as_bytes())?;

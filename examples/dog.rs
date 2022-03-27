@@ -1,5 +1,5 @@
 use std::path::Path;
-use textbundle::{self, TextBundle, TextBundleWriter, TextPackWriter};
+use textbundle::TextBundle;
 
 fn main() {
     let dog = Path::new("examples/dog.jpg");

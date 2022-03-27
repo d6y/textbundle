@@ -20,6 +20,7 @@ impl<'a> TextBundle<'a> {
         }
     }
 }
+
 fn info() -> serde_json::Value {
     json!({
         "version": 2_u8,
@@ -28,16 +29,8 @@ fn info() -> serde_json::Value {
     })
 }
 
-pub trait TextBundleWriter {
-    fn write_textbundle(&self, filename: &str) -> io::Result<()>;
-}
-
-pub trait TextPackWriter {
-    fn write_textpack(&self, filename: &str) -> ZipResult<()>;
-}
-
-impl<'a> TextPackWriter for TextBundle<'a> {
-    fn write_textpack(&self, filename: &str) -> ZipResult<()> {
+impl<'a> TextBundle<'a> {
+    pub fn write_textpack(&self, filename: &str) -> ZipResult<()> {
         let path = Path::new(filename);
         let file = std::fs::File::create(&path)?;
 
@@ -70,8 +63,8 @@ impl<'a> TextPackWriter for TextBundle<'a> {
     }
 }
 
-impl<'a> TextBundleWriter for TextBundle<'a> {
-    fn write_textbundle(&self, filename: &str) -> io::Result<()> {
+impl<'a> TextBundle<'a> {
+    pub fn write_textbundle(&self, filename: &str) -> io::Result<()> {
         let path = Path::new(filename);
         fs::create_dir_all(path)?;
 

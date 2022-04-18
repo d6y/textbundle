@@ -2,7 +2,7 @@ use serde_json::json;
 use std::fs;
 use std::io::{self, Write};
 use std::path::Path;
-use zip::result::ZipResult;
+use zip::result::{ZipError, ZipResult};
 use zip::write::FileOptions;
 
 pub struct TextBundle<'a, P: AsRef<Path>> {
@@ -53,9 +53,10 @@ impl<'a, P: AsRef<Path>> TextBundle<'a, P> {
 
             for asset in self.assets.iter() {
                 if let Some(name) = asset.as_ref().file_name() {
-                    let asset_filename = Path::new(root_folder).join("assets").join(name);
-                    let asset_bytes = std::fs::read(asset)?;
-                    zip.start_file(asset_filename.to_string_lossy(), options)?;
+                    let asset_bytes =
+                        std::fs::read(asset.as_ref()).map_err(|e| fnf(e, asset.as_ref()))?;
+                    let zip_asset_filename = Path::new(root_folder).join("assets").join(name);
+                    zip.start_file(zip_asset_filename.to_string_lossy(), options)?;
                     zip.write_all(&asset_bytes)?;
                 }
             }
@@ -64,6 +65,18 @@ impl<'a, P: AsRef<Path>> TextBundle<'a, P> {
         zip.finish()?;
         Ok(())
     }
+}
+
+// Add in the name of the missing asset (it's usually a missing file problem, but could be some other error)
+fn fnf(err: io::Error, missing: &Path) -> ZipError {
+    ZipError::Io(io::Error::new(
+        io::ErrorKind::NotFound,
+        format!(
+            "Looking for: {}, Real cause: {:}",
+            missing.to_string_lossy(),
+            err
+        ),
+    ))
 }
 
 impl<'a, P: AsRef<Path>> TextBundle<'a, P> {

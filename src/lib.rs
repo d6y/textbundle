@@ -5,14 +5,14 @@ use std::path::Path;
 use zip::result::ZipResult;
 use zip::write::FileOptions;
 
-pub struct TextBundle<'a> {
+pub struct TextBundle<'a, P: AsRef<Path>> {
     text_filename: &'a str,
     text: &'a str,
-    assets: Vec<&'a Path>,
+    assets: Vec<P>,
 }
 
-impl<'a> TextBundle<'a> {
-    pub fn new(text: &'a str, assets: Vec<&'a Path>) -> TextBundle<'a> {
+impl<'a, P: AsRef<Path>> TextBundle<'a, P> {
+    pub fn new(text: &'a str, assets: Vec<P>) -> TextBundle<'a, P> {
         TextBundle {
             text_filename: "text.markdown",
             text,
@@ -29,7 +29,7 @@ fn info() -> serde_json::Value {
     })
 }
 
-impl<'a> TextBundle<'a> {
+impl<'a, P: AsRef<Path>> TextBundle<'a, P> {
     pub fn write_textpack(&self, filename: &str) -> ZipResult<()> {
         let path = Path::new(filename);
         let file = std::fs::File::create(&path)?;
@@ -49,7 +49,7 @@ impl<'a> TextBundle<'a> {
             zip.add_directory("assets/", Default::default())?;
 
             for asset in self.assets.iter() {
-                if let Some(name) = asset.file_name() {
+                if let Some(name) = asset.as_ref().file_name() {
                     let asset_filename = Path::new("assets/").join(name);
                     let asset_bytes = std::fs::read(asset)?;
                     zip.start_file(asset_filename.to_string_lossy(), options)?;
@@ -63,7 +63,7 @@ impl<'a> TextBundle<'a> {
     }
 }
 
-impl<'a> TextBundle<'a> {
+impl<'a, P: AsRef<Path>> TextBundle<'a, P> {
     pub fn write_textbundle(&self, filename: &str) -> io::Result<()> {
         let path = Path::new(filename);
         fs::create_dir_all(path)?;
@@ -76,7 +76,7 @@ impl<'a> TextBundle<'a> {
             fs::create_dir(asset_dir)?;
 
             for asset in self.assets.iter() {
-                if let Some(name) = asset.file_name() {
+                if let Some(name) = asset.as_ref().file_name() {
                     let asset_filename = asset_dir.join(name);
                     let asset_bytes = std::fs::read(asset)?;
                     fs::write(asset_filename, &asset_bytes)?;

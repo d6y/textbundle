@@ -39,18 +39,21 @@ impl<'a, P: AsRef<Path>> TextBundle<'a, P> {
             .compression_method(zip::CompressionMethod::Stored)
             .unix_permissions(0o755);
 
-        zip.start_file("info.json", options)?;
+        let root_folder = "TextBundle";
+        zip.add_directory(root_folder, options)?;
+
+        zip.start_file(format!("{root_folder}/info.json"), options)?;
         zip.write_all(info().to_string().as_bytes())?;
 
-        zip.start_file(self.text_filename, options)?;
+        zip.start_file(format!("{root_folder}/{}", self.text_filename), options)?;
         zip.write_all(self.text.as_bytes())?;
 
         if !self.assets.is_empty() {
-            zip.add_directory("assets/", Default::default())?;
+            zip.add_directory(format!("{root_folder}/assets"), Default::default())?;
 
             for asset in self.assets.iter() {
                 if let Some(name) = asset.as_ref().file_name() {
-                    let asset_filename = Path::new("assets/").join(name);
+                    let asset_filename = Path::new(root_folder).join("assets").join(name);
                     let asset_bytes = std::fs::read(asset)?;
                     zip.start_file(asset_filename.to_string_lossy(), options)?;
                     zip.write_all(&asset_bytes)?;
